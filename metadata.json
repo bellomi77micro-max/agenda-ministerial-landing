@@ -1,0 +1,6 @@
+{
+  "name": "Agenda Ministerial Inteligente",
+  "description": "Página de vendas moderna e altamente conversiva para a Agenda Ministerial Inteligente - Gestão completa de igrejas com integração WhatsApp.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
