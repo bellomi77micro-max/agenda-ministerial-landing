@@ -350,34 +350,57 @@ export default function App() {
   const [videoUrl, setVideoUrl] = useState<string>(() => {
     const saved = localStorage.getItem("ami_wa_video_url");
     if (saved === "CLEARED") return "";
-    return saved || "https://www.youtube.com";
+    return saved || "https://youtu.be/bH0KbN21Tbk";
   });
-  const [videoInputText, setVideoInputText] = useState("");
+  const [videoInputText, setVideoInputText] = useState<string>(() => {
+    const saved = localStorage.getItem("ami_wa_video_url");
+    if (saved === "CLEARED") return "";
+    return saved || "https://youtu.be/bH0KbN21Tbk";
+  });
   const [showVideoSettings, setShowVideoSettings] = useState(true);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
-  // Handlers for video setting - Simplified to prevent heavy local file loads and keep the page ultra fast
   const handleSaveVideoUrl = (url: string) => {
     const trimmed = url.trim();
+    if (!trimmed) {
+      setSaveError("Por favor, insira um link do YouTube.");
+      setSaveSuccess(false);
+      return;
+    }
+    if (!isYouTubeUrl(trimmed)) {
+      setSaveError("Link do YouTube inválido. Use um formato como: https://youtu.be/bH0KbN21Tbk");
+      setSaveSuccess(false);
+      return;
+    }
+    setSaveError("");
     localStorage.setItem("ami_wa_video_url", trimmed);
     setVideoUrl(trimmed);
+    setSaveSuccess(true);
   };
 
   const handleClearVideo = () => {
     localStorage.setItem("ami_wa_video_url", "CLEARED");
     setVideoUrl("");
     setVideoInputText("");
+    setSaveSuccess(false);
+    setSaveError("");
   };
 
   const handleRestoreDefaultVideo = () => {
     localStorage.removeItem("ami_wa_video_url");
-    const defaultUrl = "https://www.youtube.com";
+    const defaultUrl = "https://youtu.be/bH0KbN21Tbk";
     setVideoUrl(defaultUrl);
-    setVideoInputText("");
+    setVideoInputText(defaultUrl);
+    setSaveSuccess(true);
+    setSaveError("");
   };
 
   const isYouTubeUrl = (url: string) => {
     if (!url) return false;
-    return url.includes("youtube.com") || url.includes("youtu.be");
+    const trimmed = url.trim();
+    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/;
+    return youtubeRegex.test(trimmed);
   };
 
   const getYouTubeEmbedUrl = (url: string) => {
@@ -1991,18 +2014,40 @@ export default function App() {
                           <input 
                             type="text" 
                             value={videoInputText} 
-                            onChange={(e) => setVideoInputText(e.target.value)}
+                            onChange={(e) => {
+                              setVideoInputText(e.target.value);
+                              setSaveSuccess(false);
+                              setSaveError("");
+                            }}
                             placeholder="Ex: https://www.youtube.com/watch?v=... ou https://youtube.com/@SeuCanal" 
                             className="w-full text-xs px-3.5 py-3 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-red-500 bg-slate-50/50 focus:bg-white transition-all text-slate-700 font-medium font-mono"
                           />
                         </div>
+
+                        {/* Status / feedback messages */}
+                        {saveSuccess && (
+                          <div className="text-xs bg-emerald-50 border border-emerald-200 text-emerald-800 px-3.5 py-2.5 rounded-lg font-black flex items-center gap-1.5 animate-fade-in">
+                            <Check className="w-4 h-4 text-emerald-600 stroke-[2.5]" />
+                            Link salvo com sucesso
+                          </div>
+                        )}
+
+                        {saveError && (
+                          <div className="text-xs bg-red-50 border border-red-200 text-red-800 px-3.5 py-2.5 rounded-lg font-black flex items-center gap-1.5 animate-pulse">
+                            ✕ {saveError}
+                          </div>
+                        )}
                         
                         <div className="flex flex-col sm:flex-row gap-2 pt-1">
                           <button 
                             onClick={() => handleSaveVideoUrl(videoInputText)}
-                            className="flex-grow text-[11px] font-black bg-red-600 hover:bg-red-700 text-white py-2.5 px-4 rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-xs uppercase tracking-wider"
+                            className={`flex-grow text-[11px] font-black py-2.5 px-4 rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-xs uppercase tracking-wider ${
+                              videoUrl && videoUrl.trim() === videoInputText.trim() && isYouTubeUrl(videoInputText)
+                                ? "bg-emerald-600 hover:bg-emerald-700 text-white" 
+                                : "bg-red-600 hover:bg-red-700 text-white"
+                            }`}
                           >
-                            <Check className="w-3.5 h-3.5 stroke-[2.5]" /> Salvar Link do YouTube
+                            <Check className="w-3.5 h-3.5 stroke-[2.5]" /> Salvar Link
                           </button>
                           
                           <div className="flex gap-1.5">
