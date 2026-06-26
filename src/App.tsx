@@ -165,7 +165,11 @@ export default function App() {
     return localStorage.getItem("ami_wa_number") || "5511977294510";
   });
   const [whatsappMsg, setWhatsappMsg] = useState(() => {
-    return localStorage.getItem("ami_wa_message") || "Olá! Quero conhecer a Agenda Ministerial Inteligente e saber mais sobre o teste grátis de 7 dias.";
+    const saved = localStorage.getItem("ami_wa_message");
+    if (!saved || saved === "Olá! Quero conhecer a Agenda Ministerial Inteligente e saber mais sobre o teste grátis de 7 dias.") {
+      return "Olá! Tenho interesse em testar a Agenda Ministerial Inteligente gratuitamente por 7 dias. Gostaria de receber o acesso.";
+    }
+    return saved;
   });
 
   const [showConfig, setShowConfig] = useState(false);
